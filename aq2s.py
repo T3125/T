@@ -1,0 +1,15 @@
+import socket
+server=socket.socket()
+server_add=('127.0.0.1',1231)
+server.bind(server_add)
+server.listen()
+print("Server listening")
+while True:
+    conn,addr=server.accept()
+    print("Connection Accepted")
+    data=conn.recv(1024).decode('utf-8')
+    fo=open("output.txt","w")
+    print("file Received")
+    fo.write(data)
+    fo.close()
+    conn.close()
