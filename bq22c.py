@@ -31,4 +31,3 @@ while base < len(packets):
         next_seq_num+=window_size
         base=next_seq_num
 sender_socket.close()
-
