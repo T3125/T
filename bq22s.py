@@ -1,26 +1,20 @@
 import socket
-import time
-server_address=('127.0.0.1',1234)
-window_size=4
-sender_socket=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-packets=["packet " + str(i) for i in range(10)]
-next_seq_num=0
-base=0
-while base<10:
-    for i in range(next_seq_num,min(next_seq_num+window_size,len(packets))):
-        sender_socket.sendto(packets[i].encode(),server_address)
-        print(f"sent:{packets[i]}")
-        time.sleep(1)
-    sender_socket.settimeout(2)
-    for j in range(window_size):
-        try:
-            ack,_=sender_socket.recvfrom(1024)
-            ack_num=int(ack.decode())
-            print(f"Received ACK:{ack_num}")
-            if next_seq_num==ack_num:
-                next_seq_num+=1
-        except socket.timeout:
-            print("TImeout: NO ACK received. Resending window.")
-            break
-    base=next_seq_num
-sender_socket.close()
+import random
+server_address = ('localhost', 4446)
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server_socket.bind(server_address)
+window_size = 4
+expected_sequence_number = 0
+buffer={}
+while True:
+    data, client_address = server_socket.recvfrom(1024)
+    packet_number = int(data.decode())
+    if random.random() < 0.2:
+        print(f"Received: {packet_number}, Acknowledgment not sent for packet {packet_number}")
+    else:
+        buffer[packet_number] = packet_number
+        print(f"Sending ACK for {packet_number}")
+        server_socket.sendto(str(packet_number).encode(),client_address)
+        while expected_sequence_number in buffer:
+            expected_sequence_number+=1
+server_socket.close()
